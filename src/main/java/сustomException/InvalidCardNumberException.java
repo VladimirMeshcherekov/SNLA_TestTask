@@ -1,4 +1,4 @@
-package CustomExceptions;
+package сustomException;
 
 public class InvalidCardNumberException extends Exception {
     public InvalidCardNumberException(String message) {

@@ -1,14 +1,14 @@
-import CustomExceptions.*;
+import сustomException.*;
 
 import java.math.BigDecimal;
 import java.util.Scanner;
 
-public class ConsoleView implements ATMView {
-    Scanner scanner = new Scanner(System.in);
-    ATMService atmService;
-    String currentCardNum = null;
+public class ATMConsoleView implements ATMView {
+    private Scanner scanner = new Scanner(System.in);
+    private ATMService atmService;
+    private String currentCardNum = null;
 
-    public ConsoleView (ATMService atmService, BankService bankService) {
+    public ATMConsoleView (ATMService atmService) {
         this.atmService = atmService;
     }
 
@@ -29,8 +29,11 @@ public class ConsoleView implements ATMView {
             }
 
 
-            if (!atmService.tryToEnterCard(currentCardNum) && !currentCardNum.isEmpty()) {
-                System.out.println("Card not exist");
+            try {
+                if (!atmService.enterCard(currentCardNum) && !currentCardNum.isEmpty()) {
+                }
+            } catch (CardNotExistException e) {
+                System.out.println("Card is not exist");
                 currentCardNum = null;
                 continue;
             }
@@ -39,19 +42,18 @@ public class ConsoleView implements ATMView {
 
             if(atmService.isCardBlocked()){
                 System.out.println("Card is blocked, ejecting");
-                atmService.setCurrentBankAccount(null);
-                currentCardNum = null;
+                ejectCard();
                 continue;
             }
 
             System.out.println("Enter pin");
             String cardPinInput = scanner.nextLine();
-            if(cardPinInput.length() != 4 || !cardPinInput.matches("\\d{4}")){
+            if(cardPinInput.length() != 4 || !cardPinInput.matches("\\d{4}")) {
                 System.out.println("pin is not valid");
                 continue;
             }
 
-            if (!atmService.tryToEnterPin(Integer.parseInt(cardPinInput))) {
+            if (!atmService.enterPin(Integer.parseInt(cardPinInput))) {
                 System.out.println("Pincode wrong");
                 continue;
             }
@@ -78,17 +80,14 @@ public class ConsoleView implements ATMView {
 
                         try {
                             depositValue = new BigDecimal(depositInput);
-                        }catch (Exception e){
-                            System.out.println("Deposit value input is not valid");
-                            break;
-                        }
-
-                        try {
-                            atmService.deposit(new BigDecimal(depositInput));
+                            atmService.deposit(depositValue);
                         } catch (NegativeAmountException e) {
                             System.out.println("You cant deposit negative value((");
                         } catch (ExceededMaximumDepositAmountException e) {
                             System.out.println("Deposit error: max deposit value is 1 000 000");
+                        }catch (Exception e){
+                            System.out.println("Deposit value input is not valid");
+                            break;
                         }
                         break;
                     case 3:
@@ -96,15 +95,9 @@ public class ConsoleView implements ATMView {
                         String withdrawInput = scanner.nextLine();
                         BigDecimal withdrawValue;
 
-                        try{
-                            withdrawValue = new BigDecimal(withdrawInput);
-                        }catch (Exception e){
-                            System.out.println("Withdraw value input is not valid");
-                            break;
-                        }
-
                         try {
-                            if(atmService.tryToWithdraw(withdrawValue)){
+                            withdrawValue = new BigDecimal(withdrawInput);
+                            if(atmService.withdraw(withdrawValue)){
                                 System.out.println("Success withdraw");
                             }
                         } catch (NegativeAmountException e) {
@@ -113,12 +106,15 @@ public class ConsoleView implements ATMView {
                             System.out.println("Not enough money on account");
                         } catch (NotEnoughMoneyOnATMException e) {
                             System.out.println("Not enough money on ATM");
+                        }catch (Exception e){
+                            System.out.println("Withdraw value input is not valid");
+                            break;
                         }
 
                         break;
                     case 4:
                         keepUsing = false;
-                        EjectCard();
+                        ejectCard();
                         break;
                     default:
                         System.out.println("Invalid choice.");
@@ -128,7 +124,7 @@ public class ConsoleView implements ATMView {
         }
     }
 
-    private void EjectCard(){
+    private void ejectCard (){
         atmService.setCurrentBankAccount(null);
         currentCardNum = null;
     }

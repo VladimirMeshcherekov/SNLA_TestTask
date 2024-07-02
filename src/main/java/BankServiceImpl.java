@@ -3,15 +3,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Optional;
 
-public class BankServiceServiceImpl extends BankService {
+public class BankServiceImpl implements BankService {
 
     private ArrayList<BankAccount> accounts = new ArrayList<>();
 
     BankAccountRepository repository = new JsonBankAccountRepository();
-    public BankServiceServiceImpl () {
 
+    public BankServiceImpl () {
         accounts = repository.loadFromFile();
     }
 
@@ -31,9 +30,9 @@ public class BankServiceServiceImpl extends BankService {
        updateCardRepository();
     }
 
-    public boolean tryToWithdraw (BankAccount account, BigDecimal withdrawValue) {
+    public boolean withdraw (BankAccount account, BigDecimal withdrawValue) {
         boolean withdrawStatus = account.tryToWithdraw(withdrawValue);
-        if(withdrawStatus == true){
+        if(withdrawStatus){
             updateCardRepository();
         }
         return withdrawStatus;
@@ -50,8 +49,7 @@ public class BankServiceServiceImpl extends BankService {
             return false;
         }
 
-        LocalDateTime currentTime = LocalDateTime.now();
-        Duration duration = Duration.between(LocalDateTime.parse(account.getBlockDate(), DateTimeFormatter.ISO_LOCAL_DATE_TIME) , currentTime);
+        Duration duration = Duration.between(LocalDateTime.parse(account.getBlockDate(), DateTimeFormatter.ISO_LOCAL_DATE_TIME) , LocalDateTime.now());
 
         if (duration.toHours() >= 24) {
             account.unblock();
@@ -60,7 +58,6 @@ public class BankServiceServiceImpl extends BankService {
         }
         return true;
     }
-
 
     private void updateCardRepository(){
         repository.saveToFile(accounts);
