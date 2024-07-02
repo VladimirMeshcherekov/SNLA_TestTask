@@ -1,0 +1,19 @@
+[ {
+  "cardNum" : "0000000000000000",
+  "balance" : 70,
+  "pin" : 0,
+  "blockDate" : null,
+  "blocked" : false
+}, {
+  "cardNum" : "1111111111111111",
+  "balance" : 1002,
+  "pin" : 1111,
+  "blockDate" : null,
+  "blocked" : false
+}, {
+  "cardNum" : "1111222233334444",
+  "balance" : 0.2,
+  "pin" : 1234,
+  "blockDate" : "2024-06-02T14:05:37.2253589",
+  "blocked" : true
+} ]
