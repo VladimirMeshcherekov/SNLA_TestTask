@@ -14,10 +14,10 @@ public class ConsoleView implements ATMView {
 
     public void start () {
         while (true) {
+
             if (currentCardNum == null) {
                 System.out.println("Inject card");
-                String currentCard = scanner.nextLine();
-                currentCardNum = currentCard;
+                currentCardNum = scanner.nextLine();
             }
 
             try {
@@ -46,7 +46,7 @@ public class ConsoleView implements ATMView {
 
             System.out.println("Enter pin");
             String cardPinInput = scanner.nextLine();
-            if(cardPinInput.length() != 4 || cardPinInput.matches("\\d{4}") == false){
+            if(cardPinInput.length() != 4 || !cardPinInput.matches("\\d{4}")){
                 System.out.println("pin is not valid");
                 continue;
             }

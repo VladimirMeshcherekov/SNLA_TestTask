@@ -25,9 +25,9 @@ public class JsonBankAccountRepository implements BankAccountRepository {
     public  ArrayList<BankAccount> loadFromFile () {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            System.out.println("Unable to read data from file");
             return objectMapper.readValue(new File(filePath), new TypeReference<ArrayList<BankAccount>>() {});
         } catch (IOException e) {
+            System.out.println("Unable to read data from file");
             throw new RuntimeException(e);
         }
     }
