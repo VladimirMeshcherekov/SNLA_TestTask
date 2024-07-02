@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public interface DataRepository {
+public interface BankAccountRepository {
     public void saveToFile(ArrayList<BankAccount> list);
     public  ArrayList<BankAccount> loadFromFile ();
 }

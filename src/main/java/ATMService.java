@@ -1,70 +1,98 @@
+import CustomExceptions.*;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 
 public class ATMService {
 
-    Bank bankService;
+    BankService bankService;
     BankAccount currentBankAccount;
-    @Setter private BigDecimal cashBalance;
+    @Setter
+    private BigDecimal cashBalance;
+    final BigDecimal MAX_DEPOSIT_VALUE = new BigDecimal(1000000);
 
     private int failedPinAttempts;
 
-    public ATMService (Bank bankService, BigDecimal cashBalance) {
+    public ATMService (BankService bankService, BigDecimal cashBalance) {
         this.bankService = bankService;
         this.cashBalance = cashBalance;
     }
 
-    public void setCurrentBankAccount(String cardNum){
+    public void setCurrentBankAccount (String cardNum) {
         currentBankAccount = bankService.getAccountByCardNum(cardNum);
     }
 
-    public void incrementFailedAttempts ()
-    {
+    public void incrementFailedAttempts () {
         failedPinAttempts++;
-        if(failedPinAttempts >=3){
+        if (failedPinAttempts >= 3) {
             bankService.blockAccount(currentBankAccount);
         }
     }
 
-    public BigDecimal getBalance(){
+    public BigDecimal getBalance () {
         return bankService.getBalance(currentBankAccount);
     }
 
-    public void deposit(BigDecimal value){
+    public void deposit (BigDecimal value) throws NegativeAmountException, ExceededMaximumDepositAmountException {
+
+        if (value.signum() == -1) {
+            throw new NegativeAmountException("deposit value is negative");
+        }
+
+        if (value.compareTo(MAX_DEPOSIT_VALUE) > 0) {
+            throw new ExceededMaximumDepositAmountException("deposit amount is exceeded");
+        }
+
         bankService.deposit(currentBankAccount, value);
         cashBalance = cashBalance.add(value);
     }
 
-    public WithdrawStatus tryToWithdraw(BigDecimal withdrawValue){
+    public boolean tryToWithdraw (BigDecimal withdrawValue) throws NegativeAmountException, NotEnoughMoneyOnAccountException, NotEnoughMoneyOnATMException {
 
-        if(withdrawValue.compareTo(cashBalance) > 0 && !bankService.tryToWithdraw(currentBankAccount, withdrawValue) ){
-            return WithdrawStatus.NotEnoughMoneyOnAccount;
+        if (withdrawValue.signum() == -1) {
+            throw new NegativeAmountException("withdraw value is negative");
         }
 
-        if(withdrawValue.compareTo(cashBalance) > 0){
-            return WithdrawStatus.NotEnoughMoneyOnATM;
+        if (withdrawValue.compareTo(cashBalance) > 0 && !bankService.tryToWithdraw(currentBankAccount, withdrawValue)) {
+            throw new NotEnoughMoneyOnAccountException("not enough money on account");
         }
 
-        if(!bankService.tryToWithdraw(currentBankAccount, withdrawValue)){
-            return WithdrawStatus.NotEnoughMoneyOnAccount;
+        if (withdrawValue.compareTo(cashBalance) > 0) {
+            throw new NotEnoughMoneyOnATMException("not enough money on ATM");
         }
 
-        return WithdrawStatus.Success;
+        if (!bankService.tryToWithdraw(currentBankAccount, withdrawValue)) {
+            throw new NotEnoughMoneyOnAccountException("not enough money on account");
+        }
 
-     //   return bank.tryToWithdraw(currentBankAccount, withdrawValue);
+        return true;
+
+        //   return bank.tryToWithdraw(currentBankAccount, withdrawValue);
     }
 
-    public boolean isCardBlocked(){
+    public boolean isCardBlocked () {
         return bankService.isCardBlocked(currentBankAccount);
     }
 
-    public String getValidCardNum(String inputCard){
+    public String getValidCardNum (String inputCard) throws InvalidCardNumberException {
         String cardNum = inputCard.replaceAll("-", "");
-        if (cardNum.length() != 16 && cardNum.matches("\\d{16}") == false) {
-            return null;
+        if (!cardNum.matches("\\d{16}")) {
+            throw new InvalidCardNumberException("Card num is invalid");
         }
         return cardNum;
+    }
+
+    public boolean tryToEnterPin (int pin) {
+        if (currentBankAccount.isPinValid(pin)) {
+            return true;
+        }
+        incrementFailedAttempts();
+        return false;
+    }
+
+    public boolean tryToEnterCard (String currentCardNum) {
+        currentBankAccount = bankService.getAccountByCardNum(currentCardNum);
+        return currentBankAccount != null;
     }
 
 }

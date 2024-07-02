@@ -6,10 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class CardRepository implements DataRepository {
+public class JsonBankAccountRepository implements BankAccountRepository {
 
-    private String filePath = "Cards.json";
-    public CardRepository(){}
+    private final String filePath = "Cards.json";
 
     public void saveToFile (ArrayList<BankAccount> list){
         ObjectMapper objectMapper = new ObjectMapper();

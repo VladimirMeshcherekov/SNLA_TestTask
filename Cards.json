@@ -6,14 +6,14 @@
   "blocked" : false
 }, {
   "cardNum" : "1111111111111111",
-  "balance" : 1002,
+  "balance" : 2002,
   "pin" : 1111,
-  "blockDate" : null,
+  "blockDate" : "2024-06-02T16:13:08.1512955",
   "blocked" : false
 }, {
   "cardNum" : "1111222233334444",
   "balance" : 0.2,
   "pin" : 1234,
-  "blockDate" : "2024-06-02T14:05:37.2253589",
-  "blocked" : true
+  "blockDate" : "2024-05-02T14:05:37.2253589",
+  "blocked" : false
 } ]
